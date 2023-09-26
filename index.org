@@ -1,0 +1,71 @@
+#+TITLE: Dotfiles matter!
+#+OPTIONS: ^:nil toc:nil num:nil
+#+HTML_HEAD: <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+
+* Please stop dumping files in users' $HOME directories.
+[[TL;DR: Where should you store application data?][Skip to TL;DR]]
+
+** We 💙 dotfiles!
+Dotfiles are important. We use them every day for storing configuration for all kinds of applications, knowingly or otherwise.
+You know the ones, hidden in your $HOME directory, ~~/.ssh/~ for your ssh keys, or ~~/.Xauthority~ (whatever the heck that does).
+Something you may not know is these are legacy locations for configuration. Please do not copy their behaviour. *Your application's
+configuration may be the most important thing on a user's machine.* There are now standardised locations on major platforms for
+applications to store user-specific configuration.
+
+Your application should not be dumping random files into an unconfigurable location in the user's home directory.
+
+** Configuration is important and so is its location.
+Your application's configuration is important. A user may want to back it up as an important part of their system, control its permissions,
+handle it with a script on their system or just inspect it. They may not want their configuration stored in $HOME, for example:
+ - they're on a machine that isn't under their physical control and ~~/.config~ is mounted over the network from their personal machine;
+ - an automated script they run backs up their ~~/permanent/configuration~ directory every night as their OS is stored on a RAMdisk every boot;
+ - they prefer to version control their configuration files using git, with a configuration directory managed over different branches;
+ - the user simply wants to have a clean and consistent $HOME directory and filesystem.
+
+When you hardcode your application's configuration and data directory as ~~/.my_application~, you are contributing to a trend that leaves
+people's machines less secure, less consistent, and ultimately less productive.
+
+** There are libraries to help!
+Here are a few in no particular order (YMMV):
+| Go         | https://github.com/adrg/xdg                                                        |
+| Rust       | https://github.com/dirs-dev/directories-rs, https://github.com/whitequark/rust-xdg |
+| Python     | https://github.com/srstevenson/xdg-base-dirs                                       |
+| Haskell    | https://github.com/willdonnelly/xdg-basedir                                        |
+| JavaScript | https://github.com/folder/xdg                                                      |
+| Java       | https://github.com/dirs-dev/directories-jvm                                        |
+| Clojure    | https://github.com/babashka/fs                                                     |
+| Ruby       | https://github.com/rubyworks/xdg                                                   |
+| C++        | https://github.com/azubieta/xdg-utils-cxx                                          |
+| Perl       | https://metacpan.org/pod/File::BaseDir                                             |
+
+** TL;DR: Where should you store application data?
+*** Linux/Unix
+As of 2023, most major Linux distributions and desktop environments adhere to the [[https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html][XDG Base Directory Specification]], which defines standard
+locations for different types of files: cache, configuration data, and state (... more data). The specification defines environment variables
+which if defined provide an absolute path for that kind of data. Following are the expected locations for application files in order of
+importance (each path begins from $HOME):
+
+| Cache            | $XDG_CACHE_HOME  | $HOME/.cache                      | Non-essential non-persistent data files, logs, thumbnails etc.   |
+| Configuration    | $XDG_CONFIG_HOME | $HOME/.config                     | Persistent configuration data files                              |
+| Application Data | $XDG_DATA_HOME   | $HOME/.local/share                | Data files like history, databases, logs, "stuff"                |
+| Executable Files | n/a (sigh)       | $HOME/.local/bin                  | User-facing executable files (i.e. the output of `cc -o <file>`) |
+| Runtime Data     | $XDG_RUNTIME_DIR | Should be provided by your system | This is for runtime data (sockets, pipes, whatever.)             |
+
+There are more directories, but don't overcomplicate things. Even just using ~$XDG_CACHE_HOME~ and ~$XDG_CONFIG_HOME~ is a lifesaver.
+
+*** MacOS
+Apple provides the [[https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html#//apple_ref/doc/uid/TP40010672-CH2-SW1][File System Programming Guide]], which defines expected storage locations, again for: cache, configuration and state (data).
+Following are the expected locations for application files (where ~ is $HOME, the current user's home directory):
+
+| Cache                           | ~/Library/Caches              | Non-essential, non-persistent application data                     |
+| Application Data, Configuration | ~/Library/Application Support | Persistent configuration data files and "private" application data |
+| Applications                    | ~/Applications                | Applications                                                       |
+
+When writing a cross-platform application, [[https://lobste.rs/s/dpmfrd/dotfiles_matter#c_n7myll][some developers like to enable XDG support on Darwin, too (see Linux/Unix section)]].
+
+** Please share the word.
+Users matter. Please help the movement to clean up users' $HOME directories and standardise configuration by spreading the word, opening issues
+(preferably with PRs, not to annoy maintainers!), and contributing to a world where application data can roam freely in the nature preserve of specification.
+
+** Contact
+If you have opinions or corrections please share them with me at ~offsetcyan <at> proton.me~. Thanks!
